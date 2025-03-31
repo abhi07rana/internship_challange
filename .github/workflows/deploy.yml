@@ -1,0 +1,34 @@
+name: Deploy Backend API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo pkill node || true
+            cd /home/azureuser/backend-api || mkdir -p /home/azureuser/backend-api && cd /home/azureuser/backend-api
+            git pull origin main || git clone <your-repo-url> /home/azureuser/backend-api
+            npm install
+            sudo nohup node server.js > output.log 2>&1 &
