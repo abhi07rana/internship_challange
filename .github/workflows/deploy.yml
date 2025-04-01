@@ -17,14 +17,26 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          # Create .ssh directory and set the SSH key
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+
+          # Add the server's SSH key to known hosts
           ssh-keyscan 52.188.227.175 >> ~/.ssh/known_hosts
+
+          # Deploying the application to the remote server
           ssh azureuser@52.188.227.175 << 'EOF'
+            # Stop any running node processes (ignore errors)
             sudo pkill node || true
+
+            # Navigate to the backend directory, clone if not exists
             cd /home/azureuser/backend-api || git clone <your-repo-url> backend-api && cd backend-api
+
+            # Pull the latest changes and install dependencies
             git pull origin main
             npm install
+
+            # Restart the application in the background
             sudo nohup node server.js > output.log 2>&1 &
           EOF
