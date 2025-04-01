@@ -26,7 +26,7 @@ jobs:
           ssh-keyscan 52.188.227.175 >> ~/.ssh/known_hosts
 
           # Deploying the application to the remote server
-          ssh azureuser@52.188.227.175 << 'EOF'
+          ssh -t azureuser@52.188.227.175 << 'EOF'
             # Stop any running node processes (ignore errors)
             sudo pkill node || true
 
